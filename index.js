@@ -11,9 +11,10 @@ axios.defaults.headers.common["Authorization"] = token;
 (async () => {
   const data = await arpScanner({ interface });
   const registeredMa = Object.keys((await axios.get("/mac_addrs")).data);
+  const registeredMaStr = registeredMa.join('__')
 
   const liveMa = data.map(v => v.mac.toLowerCase());
-  const macAddrs = liveMa.filter(ma => ma in registeredMa);
+  const macAddrs = liveMa.filter(ma => registeredMaStr.indexOf(ma) !== -1);
   console.log({ macAddrs, liveMa, registeredMa });
   //scarlist.anozon.me/mac_addrs?room_id=planck_units
   if (macAddrs.length === 0) {
