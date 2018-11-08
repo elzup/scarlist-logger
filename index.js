@@ -16,6 +16,9 @@ axios.defaults.headers.common["Authorization"] = token;
   const macAddrs = liveMa.filter(ma => ma in registeredMa);
   console.log({ macAddrs, liveMa, registeredMa });
   //scarlist.anozon.me/mac_addrs?room_id=planck_units
+  if (macAddrs.length === 0) {
+    return;
+  }
   await axios.post("/log", {
     room_id: "cps",
     mac_addrs: macAddrs
