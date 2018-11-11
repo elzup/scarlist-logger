@@ -1,27 +1,53 @@
+// @flow
 const axios = require("axios");
 const arpScanner = require("arpscan/promise");
 
-const token = process.env.SCARLIST_TOKEN;
-const interface = process.env.SCARLIST_INTERFACE || "wlan0";
-const host = process.env.SCARLIST_HOST;
+const config /* :{
+  host: string,
+  interface: string,
+  token: string,
+  profiles: Array<{ segment: string, roomId: string }>
+} */ = require("./config");
 
-axios.defaults.baseURL = host;
-axios.defaults.headers.common["Authorization"] = token;
+axios.defaults.baseURL = config.host;
+axios.defaults.headers.common["Authorization"] = config.token;
+
+const api = {
+  getMacAddrs: async () => {
+    const res = await axios.get("/mac_addrs");
+    return Object.keys(res.data);
+  },
+  postLog: (room_id /* :string */, mac_addrs /* :string[] */) => {
+    return axios.post("/log", {
+      room_id,
+      mac_addrs
+    });
+  }
+};
 
 (async () => {
-  const data = await arpScanner({ interface });
-  const registeredMa = Object.keys((await axios.get("/mac_addrs")).data);
-  const registeredMaStr = registeredMa.join('__')
+  const units /* { ip: string,
+    mac: string,
+    vendor: string,
+    timestamp: number }
+    */ = await arpScanner(
+    { interface: config.interface }
+  );
+  const registeredMa = await api.getMacAddrs();
+  const registeredMaStr = registeredMa.join("__");
 
-  const liveMa = data.map(v => v.mac.toLowerCase());
-  const macAddrs = liveMa.filter(ma => registeredMaStr.indexOf(ma) !== -1);
-  console.log({ macAddrs, liveMa, registeredMa });
-  //scarlist.anozon.me/mac_addrs?room_id=planck_units
-  if (macAddrs.length === 0) {
-    return;
-  }
-  await axios.post("/log", {
-    room_id: "cps",
-    mac_addrs: macAddrs
+  const liveUnits = units.filter(
+    unit => registeredMaStr.indexOf(unit.mac.toLowerCase()) !== -1
+  );
+
+  console.log({ registeredMa });
+  config.profiles.forEach(({ segment, roomId }) => {
+    const macAddrs = liveUnits
+      .filter(unit => unit.ip.indexOf(segment) !== -1)
+      .map(v => v.mac.toLowerCase());
+    console.log({ segment, macAddrs, roomId });
+    if (macAddrs.length > 0) {
+      api.postLog(roomId, macAddrs);
+    }
   });
 })();

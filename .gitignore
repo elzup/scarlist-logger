@@ -66,3 +66,5 @@ typings/
 
 
 .envrc
+
+config.json
