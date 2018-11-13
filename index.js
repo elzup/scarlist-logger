@@ -4,9 +4,8 @@ const arpScanner = require("arpscan/promise");
 
 const config /* :{
   host: string,
-  interface: string,
   token: string,
-  profiles: Array<{ segment: string, roomId: string }>
+  profiles: Array<{ interface: string, roomId: string }>
 } */ = require("./config");
 
 axios.defaults.baseURL = config.host;
@@ -25,29 +24,32 @@ const api = {
   }
 };
 
-(async () => {
-  const units /* { ip: string,
+const scan = async (
+  profile /* :{ interface: string, roomId: string } */,
+  registeredMaStr
+) => {
+  const { interface, roomId } = profile;
+  const units /* Array<{ ip: string,
     mac: string,
     vendor: string,
-    timestamp: number }
+    timestamp: number }>
     */ = await arpScanner(
-    { interface: config.interface }
+    { interface }
   );
-  const registeredMa = await api.getMacAddrs();
-  const registeredMaStr = registeredMa.join("__");
-
   const liveUnits = units.filter(
     unit => registeredMaStr.indexOf(unit.mac.toLowerCase()) !== -1
   );
+  const macAddrs = liveUnits.map(v => v.mac.toLowerCase());
+  console.log({ interface, macAddrs, roomId });
+  if (macAddrs.length > 0) {
+    api.postLog(roomId, macAddrs);
+  }
+};
 
-  console.log({ registeredMa });
-  config.profiles.forEach(({ segment, roomId }) => {
-    const macAddrs = liveUnits
-      .filter(unit => unit.ip.indexOf(segment) !== -1)
-      .map(v => v.mac.toLowerCase());
-    console.log({ segment, macAddrs, roomId });
-    if (macAddrs.length > 0) {
-      api.postLog(roomId, macAddrs);
-    }
+(async () => {
+  const registeredMa = await api.getMacAddrs();
+  const registeredMaStr = registeredMa.join("__");
+  config.profiles.forEach(profile => {
+    scan(profile, registeredMaStr);
   });
 })();

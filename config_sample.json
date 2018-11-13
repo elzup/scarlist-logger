@@ -1,14 +1,13 @@
 {
-  "interface": "wlan0",
   "token": "<app token here>",
   "host": "<app host here>",
   "profiles": [
     {
-      "segment": "192.168.12.",
+      "interface": "wlan0",
       "roomId": "room1"
     },
     {
-      "segment": "192.168.13.",
+      "interface": "eth0",
       "roomId": "room2"
     }
   ]
