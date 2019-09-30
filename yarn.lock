@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-arpscan@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/arpscan/-/arpscan-0.6.0.tgz#11113ec30c9b052fd7cd2b1e61dc6e7746a07753"
-  integrity sha1-ERE+wwybBS/XzSseYdxud0agd1M=
+arpscan@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/arpscan/-/arpscan-1.0.2.tgz#09ceb226ddc16c7d9d0dae7e2040bdafef66d677"
+  integrity sha512-zwpRnaLNAI+l81FH+i5sFWWKNwwQfDjS0BDiCRGWV9QvP0yvyTMqlVx2/k3lV5FQRndHPltgXzELUvZ0OQvBfw==
   dependencies:
     commander "^2.7.1"
     gextend "^0.1.6"
